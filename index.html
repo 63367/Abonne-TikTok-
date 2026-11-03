@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TikTok Booster — Panel SMM</title>
+<style>
+  :root{
+    --bg:#0b0b12; --card:#14141f; --card2:#1b1b29; --line:#2a2a3d;
+    --txt:#ececf4; --muted:#8e8ea8; --accent:#25f4ee; --accent2:#fe2c55;
+    --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; padding:24px 16px 64px;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 10% -10%, #1d1d33 0%, var(--bg) 55%) no-repeat, var(--bg);
+    color:var(--txt);
+  }
+  .wrap{max-width:920px;margin:0 auto}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .logo{
+    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b12;font-weight:900;
+  }
+  h1{font-size:20px;margin:0;letter-spacing:.2px}
+  header p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;
+  }
+  .card h2{
+    font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:0 0 14px;font-weight:600;display:flex;justify-content:space-between;align-items:center;
+  }
+  .grid{display:grid;gap:12px}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.svc{grid-template-columns:1.1fr 1fr .8fr}
+  @media(max-width:680px){.grid.two,.grid.svc{grid-template-columns:1fr}}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input,select,textarea{
+    width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card2);color:var(--txt);font-size:14px;font-family:inherit;outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,244,238,.12)}
+  input::placeholder{color:#5a5a72}
+  input[type=number]{-moz-appearance:textfield}
+  button{
+    cursor:pointer;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;
+    font-family:inherit;transition:transform .1s, opacity .15s, background .15s;
+  }
+  button:active{transform:scale(.98)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .btn-main{background:linear-gradient(135deg,var(--accent),#1fd9d4);color:#06121a}
+  .btn-alt{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+  .btn-danger{background:transparent;color:var(--err);border:1px solid var(--line)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .row > *{flex:0 0 auto}
+  .grow{flex:1 1 220px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{
+    background:var(--card2);border:1px solid var(--line);color:var(--muted);
+    padding:5px 11px;border-radius:999px;font-size:12px;cursor:pointer;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--txt)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-top:10px}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+  .badge{
+    display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;
+    letter-spacing:.3px;text-transform:uppercase;
+  }
+  .b-ok{background:rgba(34,197,94,.14);color:var(--ok)}
+  .b-wait{background:rgba(245,158,11,.14);color:var(--warn)}
+  .b-err{background:rgba(239,68,68,.14);color:var(--err)}
+  .b-idle{background:rgba(142,142,168,.14);color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;
+     letter-spacing:.6px;padding:0 8px 8px}
+  td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top}
+  td.mono{font-size:12px}
+  .empty{color:var(--muted);font-size:13px;padding:8px 0}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+  details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;
+    list-style:none;display:flex;align-items:center;gap:6px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸";transition:transform .15s;display:inline-block}
+  details[open] summary::before{transform:rotate(90deg)}
+  details[open] summary{margin-bottom:14px}
+  #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;
+    flex-direction:column;gap:8px;z-index:99;width:calc(100% - 32px);max-width:420px}
+  .toast{
+    padding:12px 16px;border-radius:10px;font-size:13px;background:var(--card2);
+    border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.5);
+    animation:in .2s ease-out;word-break:break-word;
+  }
+  .toast.ok{border-color:var(--ok)} .toast.err{border-color:var(--err)}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;
+    border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;
+    vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">T</div>
+    <div>
+      <h1>TikTok Booster</h1>
+      <p>Vues · Likes · Abonnés via une API de panel SMM</p>
+    </div>
+  </header>
+
+  <!-- ===== Configuration ===== -->
+  <section class="card">
+    <details id="configDetails">
+      <summary>Configuration de l'API</summary>
+
+      <div class="grid two">
+        <div>
+          <label for="apiUrl">URL de l'API du panel</label>
+          <input id="apiUrl" class="mono" placeholder="https://justanotherpanel.com/api/v2" spellcheck="false">
+        </div>
+        <div>
+          <label for="apiKey">Clé API</label>
+          <input id="apiKey" type="password" class="mono" placeholder="ta clé API" spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:12px">
+        <div>
+          <label for="proxyTemplate">Proxy CORS de secours (optionnel)</label>
+          <input id="proxyTemplate" class="mono" spellcheck="false"
+                 placeholder="https://corsproxy.io/?url={url}">
+          <p class="hint">Utilisé seulement si l'appel direct est bloqué par le navigateur (CORS). <code>{url}</code> est remplacé par l'URL encodée.</p>
+        </div>
+        <div>
+          <label>IDs de service</label>
+          <div class="grid svc" style="grid-template-columns:1fr 1fr">
+            <input id="svc-views"     class="mono" placeholder="vues">
+            <input id="svc-likes"     class="mono" placeholder="likes">
+            <input id="svc-followers" class="mono" placeholder="abonnés">
+            <input id="svc-shares"    class="mono" placeholder="partages">
+          </div>
+          <p class="hint">À récupérer sur la page <strong>Services</strong> de ton panel.</p>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn-main" id="btnSaveCfg">Enregistrer</button>
+        <button class="btn-alt" id="btnBalance">Vérifier le solde</button>
+        <button class="btn-danger" id="btnResetCfg">Réinitialiser</button>
+        <span id="balanceOut" class="mono" style="font-size:13px;color:var(--accent)"></span>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== Nouvelle commande ===== -->
+  <section class="card">
+    <h2>Nouvelle commande</h2>
+
+    <div class="grid svc">
+      <div>
+        <label for="service">Service</label>
+        <select id="service">
+          <option value="views">👁 Vues</option>
+          <option value="likes">❤️ Likes</option>
+          <option value="followers">👤 Abonnés</option>
+          <option value="shares">🔁 Partages</option>
+        </select>
+      </div>
+      <div>
+        <label for="link">Lien de la vidéo / @pseudo</label>
+        <input id="link" class="mono" spellcheck="false"
+               placeholder="https://www.tiktok.com/@user/video/7300000000000000000">
+      </div>
+      <div>
+        <label for="qty">Quantité</label>
+        <input id="qty" type="number" min="1" step="100" value="1000">
+      </div>
+    </div>
+
+    <div class="chips" id="qtyChips">
+      <span class="chip" data-q="100">100</span>
+      <span class="chip" data-q="500">500</span>
+      <span class="chip" data-q="1000">1 000</span>
+      <span class="chip" data-q="5000">5 000</span>
+      <span class="chip" data-q="10000">10 000</span>
+      <span class="chip" data-q="50000">50 000</span>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);margin:0">
+        <input type="checkbox" id="watch" checked style="width:auto;accent-color:#25f4ee">
+        Suivre la commande automatiquement
+      </label>
+      <button class="btn-main grow" id="btnOrder">Lancer la commande</button>
+    </div>
+
+    <dl class="kv" id="orderOut" style="display:none"></dl>
+  </section>
+
+  <!-- ===== Suivi manuel ===== -->
+  <section class="card">
+    <h2>Suivre une commande</h2>
+    <div class="row">
+      <div class="grow">
+        <label for="orderId">ID de commande</label>
+        <input id="orderId" class="mono" placeholder="12345678" spellcheck="false">
+      </div>
+      <button class="btn-alt" id="btnStatus">Vérifier le statut</button>
+    </div>
+    <dl class="kv" id="statusOut" style="display:none"></dl>
+  </section>
+
+  <!-- ===== Historique ===== -->
+  <section class="card">
+    <h2>
+      Historique
+      <button class="btn-danger" id="btnClearHist" style="padding:5px 10px;font-size:12px">Vider</button>
+    </h2>
+    <div id="histOut"></div>
+  </section>
+
+</div>
+
+<div id="toasts"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------------- Constantes & état ---------------- */
+
+  const LS_CFG  = "tiktok-booster:config";
+  const LS_HIST = "tiktok-booster:historique";
+  const FINAL   = new Set(["Completed", "Partial", "Canceled", "Refunded"]);
+
+  const DEFAULTS = {
+    apiUrl: "https://justanotherpanel.com/api/v2",
+    apiKey: "",
+    proxyTemplate: "https://corsproxy.io/?url={url}",
+    services: { views: "1001", likes: "1002", followers: "1003", shares: "1004" }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const lire = (cle, defaut) => {
+    try { return { ...defaut, ...JSON.parse(localStorage.getItem(cle) || "{}") }; }
+    catch { return { ...defaut }; }
+  };
+
+  let cfg = lire(LS_CFG, DEFAULTS);
+  cfg.services = { ...DEFAULTS.services, ...(cfg.services || {}) };
+  let historique = JSON.parse(localStorage.getItem(LS_HIST) || "[]");
+  let pollTimer = null;
+
+  /* ---------------- Utilitaires UI ---------------- */
+
+  function toast(message, type = "") {
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    el.textContent = message;
+    $("toasts").appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 250); }, 4200);
+  }
+
+  function badge(statut) {
+    const s = (statut || "").toLowerCase();
+    if (!s) return '<span class="badge b-idle">inconnu</span>';
+    if (s.includes("completed")) return `<span class="badge b-ok">${statut}</span>`;
+    if (s.includes("cancel") || s.includes("refund") || s.includes("fail"))
+      return `<span class="badge b-err">${statut}</span>`;
+    return `<span class="badge b-wait">${statut}</span>`;
+  }
+
+  function afficherKV(cible, entrees) {
+    const dl = $(cible);
+    dl.innerHTML = entrees
+      .filter(([, v]) => v !== undefined && v !== null && v !== "")
+      .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`)
+      .join("");
+    dl.style.display = "block";
+  }
+
+  /* ---------------- Appels API ---------------- */
+
+  async function poster(params, { proxySiEchec = true } = {}) {
+    if (!cfg.apiKey) throw new Error("Clé API manquante : ouvre « Configuration de l'API ».");
+
+    const body = new URLSearchParams({ ...params, key: cfg.apiKey }).toString();
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body
+    };
+
+    const cibles = [cfg.apiUrl];
+    if (proxySiEchec && cfg.proxyTemplate && cfg.proxyTemplate.includes("{url}")) {
+      cibles.push(cfg.proxyTemplate.replace("{url}", encodeURIComponent(cfg.apiUrl)));
+    }
+
+    let derniere;
+    for (const url of cibles) {
+      try {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const texte = await res.text();
+        let data;
+        try { data = JSON.parse(texte); }
+        catch { throw new Error("Réponse non-JSON : " + texte.slice(0, 120)); }
+        if (data && data.error) throw new Error(data.error);
+        return data;
+      } catch (e) {
+        derniere = e;
+      }
+    }
+    throw new Error(derniere.message + " (réseau ou CORS — vérifie l'URL de l'API)");
+  }
+
+  /* ---------------- Configuration ---------------- */
+
+  function remplirConfig() {
+    $("apiUrl").value = cfg.apiUrl;
+    $("apiKey").value = cfg.apiKey;
+    $("proxyTemplate").value = cfg.proxyTemplate;
+    for (const s of Object.keys(cfg.services)) $("svc-" + s).value = cfg.services[s];
+  }
+
+  function sauverConfig() {
+    cfg = {
+      apiUrl: $("apiUrl").value.trim() || DEFAULTS.apiUrl,
+      apiKey: $("apiKey").value.trim(),
+      proxyTemplate: $("proxyTemplate").value.trim(),
+      services: {}
+    };
+    for (const s of Object.keys(DEFAULTS.services)) {
+      cfg.services[s] = ($("svc-" + s).value.trim() || DEFAULTS.services[s]);
+    }
+    localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+    toast("Configuration enregistrée.", "ok");
+  }
+
+  async function verifierSolde() {
+    const btn = $("btnBalance");
+    const sortie = $("balanceOut");
+    btn.disabled = true;
+    sortie.innerHTML = '<span class="spin"></span>';
+    try {
+      const data = await poster({ action: "balance" });
+      sortie.textContent = `Solde : ${data.balance ?? "?"} ${data.currency ?? ""}`;
+    } catch (e) {
+      sortie.textContent = "";
+      toast(e.message, "err");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------------- Commandes ---------------- */
+
+  async function lancerCommande() {
+    const service = $("service").value;
+    const lien = $("link").value.trim();
+    const qty = parseInt($("qty").value, 10);
+
+    if (!lien) return toast("Renseigne le lien de la vidéo (ou @pseudo pour les abonnés).", "err");
+    if (!Number.isFinite(qty) || qty < 1) return toast("Quantité invalide.", "err");
+
+    const btn = $("btnOrder");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span>Envoi…';
+
+    try {
+      const data = await poster({
+        action: "add",
+        service: cfg.services[service],
+        link: lien,
+        quantity: qty
+      });
+
+      if (!data.order) throw new Error("Réponse inattendue : " + JSON.stringify(data).slice(0, 140));
+
+      const orderId = String(data.order);
+      toast(`Commande ${orderId} créée.`, "ok");
+
+      const entree = {
+        id: orderId, date: new Date().toISOString(),
+        service, lien, qty, statut: "En attente", restant: "?"
+      };
+      historique.unshift(entree);
+      sauverHistorique();
+      afficherHistorique();
+
+      afficherKV("orderOut", [
+        ["ID", orderId],
+        ["Service", service],
+        ["Quantité", qty],
+        ["Lien", lien],
+        ["Réponse", data.charge ? `débit ${data.charge}` : ""]
+      ]);
+
+      if ($("watch").checked) suivreCommande(orderId);
+    } catch (e) {
+      toast(e.message, "err");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Lancer la commande";
+    }
+  }
+
+  function majHistorique(orderId, maj) {
+    const e = historique.find((x) => x.id === orderId);
+    if (!e) return;
+    Object.assign(e, maj);
+    sauverHistorique();
+    afficherHistorique();
+  }
+
+  function suivreCommande(orderId, intervalle = 10000) {
+    clearInterval(pollTimer);
+    const tick = async () => {
+      try {
+        const data = await poster({ action: "status", order: orderId }, { proxySiEchec: false });
+        const statut = String(data.status ?? "?");
+        const restant = data.remains ?? "?";
+
+        afficherKV("statusOut", [
+          ["ID", orderId],
+          ["Statut", badge(statut)],
+          ["Restant", restant],
+          ["Départ", data.start_count ?? ""],
+          ["Débit", data.charge ?? ""]
+        ]);
+        majHistorique(orderId, { statut, restant });
+
+        if (FINAL.has(statut)) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+          toast(`Commande ${orderId} terminée : ${statut}`, "ok");
+        }
+      } catch (e) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        toast("Suivi interrompu : " + e.message, "err");
+      }
+    };
+    tick();
+    pollTimer = setInterval(tick, intervalle);
+  }
+
+  async function verifierStatutManuel() {
+    const id = $("orderId").value.trim();
+    if (!id) return toast("Indique un ID de commande.", "err");
+    try {
+      const data = await poster({ action: "status", order: id }, { proxySiEchec: false });
+      afficherKV("statusOut", [
+        ["ID", id],
+        ["Statut", badge(String(data.status ?? "?"))],
+        ["Restant", data.remains ?? "?"],
+        ["Départ", data.start_count ?? ""]
+      ]);
+    } catch (e) {
+      toast(e.message, "err");
+    }
+  }
+
+  /* ---------------- Historique ---------------- */
+
+  function sauverHistorique() {
+    localStorage.setItem(LS_HIST, JSON.stringify(historique.slice(0, 50)));
+  }
+
+  function afficherHistorique() {
+    const zone = $("histOut");
+    if (!historique.length) {
+      zone.innerHTML = '<p class="empty">Aucune commande pour le moment.</p>';
+      return;
+    }
+    zone.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Service</th><th>Qté</th><th>Cible</th><th>ID</th><th>Statut</th>
+        </tr></thead>
+        <tbody>
+          ${historique.map((e) => `
+            <tr>
+              <td>${new Date(e.date).toLocaleString("fr-FR")}</td>
+              <td>${e.service}</td>
+              <td>${e.qty}</td>
+              <td class="mono" style="max-width:220px;word-break:break-all">${e.lien}</td>
+              <td class="mono">${e.id}</td>
+              <td>${badge(e.statut)}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  }
+
+  /* ---------------- Événements ---------------- */
+
+  $("btnSaveCfg").addEventListener("click", sauverConfig);
+  $("btnBalance").addEventListener("click", verifierSolde);
+  $("btnResetCfg").addEventListener("click", () => {
+    localStorage.removeItem(LS_CFG);
+    cfg = { ...DEFAULTS, services: { ...DEFAULTS.services } };
+    remplirConfig();
+    toast("Configuration réinitialisée.");
+  });
+
+  $("btnOrder").addEventListener("click", lancerCommande);
+  $("btnStatus").addEventListener("click", verifierStatutManuel);
+  $("btnClearHist").addEventListener("click", () => {
+    if (!confirm("Supprimer tout l'historique local ?")) return;
+    historique = [];
+    sauverHistorique();
+    afficherHistorique();
+  });
+
+  $("qtyChips").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (chip) $("qty").value = chip.dataset.q;
+  });
+
+  $("service").addEventListener("change", () => {
+    const abonnes = $("service").value === "followers";
+    const champ = $("link");
+    champ.placeholder = abonnes
+      ? "@pseudo"
+      : "https://www.tiktok.com/@user/video/7300000000000000000";
+  });
+
+  // Entrée = lancer la commande
+  $("link").addEventListener("keydown", (e) => { if (e.key === "Enter") lancerCommande(); });
+  $("qty").addEventListener("keydown", (e) => { if (e.key === "Enter") lancerCommande(); });
+
+  // Ouvre la config automatiquement si aucune clé n'est définie
+  if (!cfg.apiKey) $("configDetails").open = true;
+
+  remplirConfig();
+  afficherHistorique();
+})();
+</script>
+</body>
+</html>
